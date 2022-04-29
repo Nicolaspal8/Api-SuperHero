@@ -3,19 +3,30 @@ $(document).ready(function(){
 
         event.preventDefault();
         let busqueda = $('input').val();
+        let parametro;
+        if(isNaN(busqueda)){
+            parametro = "results";
+            busqueda = "search/" + busqueda
+        }    
+        else{
+            parametro = "";  
+        } 
         let estadisticas = [];
-    
+        console.log(parametro)
         $.ajax({
             type: 'GET',
             url: `https://www.superheroapi.com/api.php/10227715866708543/${busqueda}`,
             dateType: 'JSON',
             success:function(resp){
-                console.log(resp)
-                for(key in resp.powerstats){
+                let objt = resp;
+                if(parametro != "") objt = resp.results[0];
+                console.log(objt)
+                for(key in objt.powerstats){
                     estadisticas.push({
-                        y: resp.powerstats[key], label: key 
+                        y: objt.powerstats[key], label: key 
                     })
                 }
+               
                 //Incertar caracterisitcas en card
                 $('.super_hero').html(`
                 <div class="col-12 col-md-6">
@@ -23,24 +34,24 @@ $(document).ready(function(){
                     <div class="card mb-3">
                         <div class="row g-0">
                             <div class="col-md-4">
-                                <img src="${resp.image.url}" class="img-fluid rounded-start" alt="">
+                                <img src="${objt.image.url}" class="img-fluid rounded-start" alt="">
                             </div>
                             <div class="col-md-8">
                                 <div class="card-body">
-                                    <h4 class="card-tittle">Nombre: ${resp.name}</h4>
-                                    <p class="card-text">${resp.connections["group-affiliation"]}</p>
+                                    <h4 class="card-tittle">Nombre: ${objt.name}</h4>
+                                    <p class="card-text">${objt.connections["group-affiliation"]}</p>
                                     <hr>
-                                    <p class="card-text">Publicado por: ${resp.biography.publisher}</p>
+                                    <p class="card-text">Publicado por: ${objt.biography.publisher}</p>
                                     <hr>
-                                    <p class="card-text">Ocupacion: ${resp.work.occupation}</p>
+                                    <p class="card-text">Ocupacion: ${objt.work.occupation}</p>
                                     <hr>
-                                    <p class="card-text">Primera aparicion ${resp.biography["first-appearance"]}</p>
+                                    <p class="card-text">Primera aparicion ${objt.biography["first-appearance"]}</p>
                                     <hr>
-                                    <p class="card-text">Altura: ${resp.appearance.height[0]}</p>
+                                    <p class="card-text">Altura: ${objt.appearance.height[0]}</p>
                                     <hr>
-                                    <p class="card-text">Peso: ${resp.appearance.weight[0]}</p>
+                                    <p class="card-text">Peso: ${objt.appearance.weight[0]}</p>
                                     <hr>
-                                    <p class="card-text">Aliansas: ${resp.biography.aliases}</p>
+                                    <p class="card-text">Aliansas: ${objt.biography.aliases}</p>
                                 </div>
                             </div>
                         </div>
@@ -53,11 +64,8 @@ $(document).ready(function(){
                 `) 
                 var options = {
                     title: {
-                        text: "Desktop OS Market Share in 2017"
+                        text: `Estadisticas de poder para ${resp.name}`
                     },
-                    subtitles: [{
-                        text: "As of November, 2017"
-                    }],
                     animationEnabled: true,
                     data: [{
                         type: "pie",
@@ -74,6 +82,8 @@ $(document).ready(function(){
                 
             },
             error:function(xhr,status){
+
+                alert("no encontrado")
                 console.error("Error al consultar informacion: " + status)
             }
         })
